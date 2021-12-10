@@ -31,7 +31,7 @@ class LogDNAStream extends EventEmitter {
     })
   }
 
-  write(record) {
+  async write(record) {
 
     const {
       msg: message
@@ -41,6 +41,11 @@ class LogDNAStream extends EventEmitter {
     , timestamp // Bunyan provides timestamp, so just use that for LogDNA's time as well
     , ...meta
     } = record
+    
+    for (const [key, value] of Object.entries(meta)) {
+      if (!value.then) continue;
+      meta[key] = await value;
+    }
 
     const opts = {
       level: levels[level]
